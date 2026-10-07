@@ -40,6 +40,10 @@ archives:
 checksum:
   name_template: checksums.txt
 
+# The rolling nightly tag points at master and must never be taken as a version.
+git:
+  ignore_tags: [nightly]
+
 snapshot:
   version_template: '{{ envOrDefault "ELF_VERSION" "0.0.0-SNAPSHOT" }}'
 
