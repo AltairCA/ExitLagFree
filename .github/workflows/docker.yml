@@ -1,0 +1,67 @@
+name: docker
+
+# Builds the exitlag-node image for amd64 and arm64 and pushes it to GHCR.
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Version string embedded in the binary"
+        type: string
+        required: true
+      ref:
+        description: "Git ref to build"
+        type: string
+        required: true
+      tags:
+        description: "Comma-separated image tags, e.g. nightly or v1.2.3,latest"
+        type: string
+        required: true
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Image name and tags
+        id: meta
+        env:
+          TAGS: ${{ inputs.tags }}
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/exitlagfree-node"
+          {
+            echo "image=$image"
+            echo "tags<<EOF"
+            tr ',' '\n' <<< "$TAGS" | sed '/^$/d' | sed "s|^|$image:|"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        env:
+          # Keep the run's artifacts limited to release files (the nightly job publishes all of them).
+          DOCKER_BUILD_RECORD_UPLOAD: false
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: VERSION=${{ inputs.version }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.description=ExitLagFree relay node
+            org.opencontainers.image.version=${{ inputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

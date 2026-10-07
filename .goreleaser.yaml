@@ -1,0 +1,48 @@
+version: 2
+
+project_name: exitlagfree
+
+before:
+  hooks:
+    - go test ./...
+
+builds:
+  - id: exitlag-node
+    main: ./cmd/exitlag-node
+    binary: exitlag-node
+    env: [CGO_ENABLED=0]
+    goos: [linux]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X github.com/AltairCA/ExitLagFree/internal/version.Version={{.Version}}
+
+  - id: exitlag-helper
+    main: ./cmd/exitlag-helper
+    binary: exitlag-helper
+    env: [CGO_ENABLED=0]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X github.com/AltairCA/ExitLagFree/internal/version.Version={{.Version}}
+
+archives:
+  - id: node
+    ids: [exitlag-node]
+    formats: [binary]
+    name_template: "exitlag-node-{{ .Os }}-{{ .Arch }}"
+  - id: helper
+    ids: [exitlag-helper]
+    name_template: "exitlag-helper-{{ .Os }}-{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: '{{ envOrDefault "ELF_VERSION" "0.0.0-SNAPSHOT" }}'
+
+release:
+  extra_files:
+    - glob: ./scripts/install.sh

@@ -1,0 +1,21 @@
+{
+  "id": "fortnite",
+  "name": "Fortnite",
+  "description": "Fortnite match servers run on AWS. Pick the matchmaking region(s) you play on.",
+  "notes": "Routes are built from Amazon's published EC2 ranges (ip-ranges.amazonaws.com) for the selected regions, so other services hosted there are also relayed.",
+  "cidrs": [],
+  "cloud": {
+    "aws_services": ["EC2"],
+    "regions": [
+      { "id": "aws:us-east-1", "label": "NA-East (Virginia)" },
+      { "id": "aws:us-east-2", "label": "NA-Central (Ohio)" },
+      { "id": "aws:us-west-2", "label": "NA-West (Oregon)" },
+      { "id": "aws:eu-west-2", "label": "Europe (London)" },
+      { "id": "aws:eu-central-1", "label": "Europe (Frankfurt)" },
+      { "id": "aws:sa-east-1", "label": "Brazil (Sao Paulo)" },
+      { "id": "aws:ap-southeast-2", "label": "Oceania (Sydney)" },
+      { "id": "aws:ap-northeast-1", "label": "Asia (Tokyo)" },
+      { "id": "aws:me-south-1", "label": "Middle East (Bahrain)" }
+    ]
+  }
+}
